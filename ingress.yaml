@@ -1,0 +1,28 @@
+# 사전에 tls 배포 필요
+# kubectl create secret tls tls-aip --key tls.key --cert tls.chain.crt -n aip
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aip-admin-front  # 설정 필요
+  namespace: aip         # 설정 필요
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - abc.com        # 설정 필요
+    secretName: tls-aip
+  rules:
+  - host: abc.com   # 설정 필요
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aip-admin-front  # 설정 필요
+            port:
+              number: 80         
