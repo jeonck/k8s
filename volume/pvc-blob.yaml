@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-sample  # admin-front 전용 PVC 이름
+  namespace: sample  # admin-front가 배포된 네임스페이스
+spec:
+  accessModes:
+    - ReadWriteMany  # 동일한 PV를 여러 클레임에서 접근 가능하게 설정
+  storageClassName: azureblob-fuse-premium  # 기존 스토리지 클래스 사용
+  resources:
+    requests:
+      storage: 10Gi  # 필요에 따라 크기 조정
