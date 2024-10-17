@@ -1,0 +1,27 @@
+# kubectl create secret generic secret-admin-front-blob --from-literal=azurestorageaccountname=saaisvcdev --from-literal=azurestorageaccountkey=*** -n sample
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: blob.csi.azure.com
+  name: pv-sample  # admin-front 전용 PV 이름
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain  # PVC 삭제 시 Blob 컨테이너가 삭제되지 않음
+  storageClassName: azureblob-fuse-premium
+  mountOptions:
+    - -o allow_other
+    - --file-cache-timeout-in-seconds=120
+  csi:
+    driver: blob.csi.azure.com
+    readOnly: false
+    volumeHandle: sample-volume  # volumeHandle은 클러스터 내에서 유일해야 함
+    volumeAttributes:
+      containerName: sample  # Azure Blob 스토리지 컨테이너 이름
+    nodeStageSecretRef:
+      name: secret-admin-front-blob  # 시크릿 이름
+      namespace: sample  # 네임스페이스 설정 
