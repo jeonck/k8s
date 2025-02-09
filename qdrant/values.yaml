@@ -1,0 +1,72 @@
+# helm repo add qdrant https://qdrant.github.io/qdrant-helm/
+# helm install qdrant qdrant/qdrant -f values.yaml -n qdrant
+# helm upgrade qdrant qdrant/qdrant -f values.yaml -n qdrant
+replicaCount: 6  # 3 샤드 * 2 복제본
+
+image:
+  repository: qdrant/qdrant
+  tag: "v1.12.2"  # Qdrant 1.12.2 버전
+  pullPolicy: IfNotPresent
+
+config:
+  cluster:
+    enabled: true
+  storage:
+    shards: 3
+    replication_factor: 2
+  service:
+    api_key: "sample-N2Xb83oTcY_S8QIYII_KXQLGROk6I"
+    read_only_api_key: "sample-lGjN2Xb83oTcY_S8QIYII_KXQLGROk4I"
+collection:
+  replication_factor: 2
+  write_consistency_factor: 2
+
+persistence:
+  enabled: true
+  size: 30Gi
+  storageClass: "managed-csi"  # 사용 가능한 스토리지 클래스로 변경
+
+resources:
+  requests:
+    cpu: 0.5      # 테스트 기간 동안 줄여서 운영
+    memory: 1Gi
+  limits:
+    cpu: 0.5      # 테스트 기간 동안 줄여서 운영
+    memory: 1Gi
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - qdrant
+        topologyKey: "kubernetes.io/hostname"
+
+tolerations: []
+
+nodeSelector: {}
+
+service:
+  type: ClusterIP
+  port: 6333
+  grpcPort: 6334
+
+ingress:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
