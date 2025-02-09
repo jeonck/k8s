@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sample-proactive-batch-cronjob
+spec:
+  schedule: "*/10 0-14 * * *"  # 09시부터 14시 50분까지 매 10분마다 실행 (UTC 기준)
+  concurrencyPolicy: Forbid  # 이전 Job이 끝나지 않으면 새로운 Job 실행하지 않음
+  startingDeadlineSeconds: 600  # 최대 10분 지연 후 Job 실행
+  successfulJobsHistoryLimit: 3  # 성공한 Job의 최대 기록 수
+  failedJobsHistoryLimit: 1  # 실패한 Job의 최대 기록 수
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: sample-proactive-batch
+            image: sample.azurecr.io/sample-proactive-batch/dev/sample-proactive-batch:1.0.459419
+            command: ["/bin/sh"]
+            args: ["-c", "env=dev poetry run python src/main/batch_proactive.py"]  # batch_proactive.py 실행
+            env:
+              - name: TZ
+                value: Asia/Seoul  # 서울 시간대 설정
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "500m"
+              limits:
+                memory: "1Gi"
+                cpu: "1000m"
+          restartPolicy: OnFailure  # 실패 시에만 재시작
