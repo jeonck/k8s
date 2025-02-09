@@ -1,0 +1,51 @@
+# helm install langfuse langfuse/langfuse --values langfuse-values.yaml -n langfuse
+# postgresql에 langfuse용 DB생성: CREATE DATABASE langfuse_db;
+# Pgpool-II에 사용자와 비밀번호 등록: pg_md5 -m -u postgres your-db-password -f /opt/bitnami/pgpool/conf/pgpool.conf
+# 패스워드 등록 확인: cat /opt/bitnami/pgpool/conf/pool_passwd
+# 재시작: kubectl exec -it postgresql-postgresql-ha-pgpool-7778f54d7c-wjs99 -n langfuse -- pgpool reload
+
+replicaCount: 2
+resources:
+  requests:
+    memory: "1Gi"        # 최소 1Gi 메모리 요청
+    cpu: "500m"          # 최소 0.5 vCPU 요청
+  limits:
+    memory: "2Gi"        # 최대 2Gi 메모리 사용
+    cpu: "1000m"         # 최대 1 vCPU 사용
+
+image:
+  repository: ghcr.io/langfuse/langfuse
+  tag: "2.82.0"  # 특정 버전으로 고정
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 3000
+  initialDelaySeconds: 30  # 초기 지연 시간을 30초로 설정 (필요에 따라 더 길게 설정)
+  timeoutSeconds: 10
+  periodSeconds: 10
+  failureThreshold: 6
+
+readinessProbe:
+  httpGet:
+    path: /api/public/health
+    port: 3000
+  initialDelaySeconds: 30  # 초기 지연 시간을 30초로 설정
+  timeoutSeconds: 10
+  periodSeconds: 10
+  failureThreshold: 6
+langfuse:
+  nextauth:
+    url: https://sample.com
+  
+  additionalEnv:
+    - name: DATABASE_URL
+      value: postgres://postgres:YjIzijhwNo@postgresql-postgresql-ha-pgpool.langfuse.svc.cluster.local:5432/langfuse_db   # 주의ㅅㄱㄷ
+
+service:
+  type: ClusterIP
+  port: 3000
+
+# PostgreSQL은 HA로 별도로 배포하므로 langfuse 차트에서는 비활성화
+postgresql:
+  deploy: false
