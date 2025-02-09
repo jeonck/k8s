@@ -1,0 +1,279 @@
+# kubectl apply -f fluentd-configmap.yaml
+# kubectl rollout restart daemonset fluentd -n kube-system
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: kube-system
+data:
+  fluent.conf: |
+    # 시스템 설정: 로그 레벨을 warn으로 설정하여 불필요한 로그를 줄임, 필요시 info, debug 가능
+    <system>
+      log_level warn
+    </system>
+    
+    
+    # batch
+    <source>
+      @type tail
+      path /var/log/containers/aip-*-batch*.log
+      pos_file /var/log/fluentd/fluentd-containers-aip-batch.log.pos
+      tag kube.aip.batch
+      format cri
+    </source>
+    <match kube.aip.batch>
+      @type opensearch
+      host "sample.com"    # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-batch"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+    
+    
+    
+    # labs
+    <source>
+      @type tail
+      path /var/log/containers/aip-admin-*.log
+      pos_file /var/log/fluentd/fluentd-containers-aip-admin.log.pos
+      tag kube.aip.labs
+      format cri
+    </source>
+    <match kube.aip.labs>
+      @type opensearch
+      host "sample.com"    # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-labs"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+  
+  
+    # api
+    <source>
+      @type tail
+      path /var/log/containers/aip-api-*.log
+      pos_file /var/log/fluentd/fluentd-containers-aip-api.log.pos
+      tag kube.aip.api
+      format cri
+    </source>
+    <match kube.aip.api>
+      @type opensearch
+      host "sample.com"    # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-api"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+    
+    
+  
+    # 나머지 api 들
+    <source>
+      @type tail
+      path /var/log/containers/aip-*.log  # 'aip' 네임스페이스의 로그만 수집
+      exclude_path /var/log/containers/aip-*-batch*.log
+      exclude_path /var/log/containers/aip-admin-*.log
+      exclude_path /var/log/containers/aip-api-*.log
+      pos_file /var/log/fluentd/fluentd-containers-aip-default.log.pos
+      tag kube.aip.default
+      format cri
+    </source>
+    <match kube.aip.default>
+      @type opensearch
+      host "sample.com"     # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-default"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+    
+    
+  
+    
+    # 'hephi' 네임스페이스의 로그 수집 설정
+    <source>
+      @type tail
+      path /var/log/containers/hephi*.log  # 'hephi' 네임스페이스의 로그만 수집
+      pos_file /var/log/fluentd/fluentd-containers-hephi.log.pos
+      tag kube.aip.hephi
+      format cri
+    </source>
+    <match kube.aip.hephi>
+      @type opensearch
+      host "sample.com"     # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-hephi-dev"  # hephi 로그를 위한 인덱스 패턴
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+    
+
+    
+    # ingress-nginx 로그 수집 설정
+    <source>
+      @type tail
+      path /var/log/containers/ingress-nginx-*.log  # ingress-nginx 로그 경로
+      pos_file /var/log/fluentd/fluentd-ingress-nginx-controller.log.pos
+      tag kube.ingress-nginx.controller
+      format cri
+    </source>
+    <match kube.ingress-nginx.controller>
+      @type opensearch
+      host "sample.com"     # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-ingress"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+
+
+
+    # syslog 수집 설정
+    <source>
+      @type tail
+      tag kube.k8s_node_syslog
+      path /var/log/syslog
+      pos_file /var/log/fluentd/fluentd-syslog.pos  # pos_file 경로
+      <parse>
+        @type syslog
+        time_format %b %d %H:%M:%S
+      </parse>
+    </source>
+    # syslog 필터 설정
+    <filter kube.k8s_node_syslog>
+      @type record_transformer
+      enable_ruby true
+      <record>
+        @timestamp ${Time.now.getlocal('+09:00').strftime('%Y-%m-%dT%H:%M:%S%z')}
+      </record>
+      remove_keys timestamp
+    </filter>
+    <match kube.k8s_node_syslog>
+      @type opensearch
+      host "sample.com"     # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev-syslog"
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 10s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 5
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
+
+
+
+    # Kubernetes 메타데이터 필터 설정
+    <filter kube.**>
+      @type kubernetes_metadata
+      cache_size 1000               # 캐시 크기를 적절하게 설정
+      cache_ttl 3600                # 캐시 TTL (초 단위)
+      watch false                   # 비활성화하여 API 서버와의 지속적인 연결 방지
+    </filter>
+
+
+
+    # 다른 로그에 대한 출력 설정
+    <match **>
+      @type opensearch
+      host "sample.com"     # host 설정
+      port 443
+      logstash_format true
+      logstash_prefix "fluentd-aip-dev"  # 기본 인덱스 패턴
+      scheme https
+      ssl_verify true
+      ssl_version TLSv1_2
+      user admin
+      password "your-passwd!!"
+      <buffer>
+        flush_interval 3s
+        chunk_limit_size 16M
+        queue_limit_length 512
+        retry_max_interval 60
+        retry_limit 10
+      </buffer>
+      slow_flush_log_threshold 10s
+    </match>
