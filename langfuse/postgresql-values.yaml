@@ -1,0 +1,50 @@
+# helm install postgresql oci://registry-1.docker.io/bitnamicharts/postgresql-ha -n langfuse -f postgresql-values.yaml
+# export PASSWORD=$(kubectl get secret --namespace "langfuse" postgresql-postgresql-ha-postgresql -o jsonpath="{.data.password}" | base64 -d)
+# export REPMGR_PASSWORD=$(kubectl get secret --namespace "langfuse" postgresql-postgresql-ha-postgresql -o jsonpath="{.data.repmgr-password}" | base64 -d)
+# export ADMIN_PASSWORD=$(kubectl get secret --namespace "langfuse" postgresql-postgresql-ha-pgpool -o jsonpath="{.data.admin-password}" | base64 -d)
+
+# helm upgrade postgresql oci://registry-1.docker.io/bitnamicharts/postgresql-ha -n langfuse -f postgresql-values.yaml \
+#   --set global.postgresql.auth.password=$PASSWORD \
+#   --set global.postgresql.auth.replicationPassword=$REPMGR_PASSWORD \
+#   --set pgpool.adminPassword=$ADMIN_PASSWORD
+
+global:
+  postgresql:
+    auth:
+      username: postgres  # 기본 postgres 사용자를 위한 설정
+      password: ODtWAX6WHs  # postgres 사용자의 비밀번호
+      replicationPassword: Z7BOL2yusP  # 복제 비밀번호 설정
+
+pgpool:
+  adminUser:
+    username: pgpool_admin  # pgpool 관리자 사용자 이름
+    password: p6Tqa4tCvS  # pgpool 관리자 비밀번호
+  # customUsers:
+  #   usernames: "langfuse"  # 추가할 사용자
+  #   passwords: "your-db-password"  # 추가할 사용자의 비밀번호
+  resources:
+    requests:
+      cpu: "250m"        # CPU 요청
+      memory: "512Mi"    # 메모리 요청
+    limits:
+      cpu: "500m"        # CPU 한도
+      memory: "1Gi"      # 메모리 한도
+
+postgresql:
+  replicaCount: 3  # PostgreSQL 복제본의 개수 (필요에 따라 변경 가능)
+  resources:
+    requests:
+      cpu: "250m"        # CPU 요청
+      memory: "512Mi"    # 메모리 요청
+    limits:
+      cpu: "500m"        # CPU 한도
+      memory: "1Gi"      # 메모리 한도
+
+persistence:
+  enabled: true
+  size: 30Gi  # PVC 크기 설정 (필요에 따라 변경 가능)
+  storageClass: "managed-csi"  # 스토리지 클래스 이름 (Azure 환경에서 managed CSI 사용)
+
+service:
+  type: ClusterIP  # 서비스 타입 설정 (LoadBalancer, ClusterIP, NodePort 중 선택 가능)
+  port: 5432  # PostgreSQL 기본 포트
