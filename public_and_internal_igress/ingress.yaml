@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-public
+  namespace: public-namespace  # 외부 접근을 위한 네임스페이스
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1G"  # client_max_body_size 설정
+spec:
+  ingressClassName: nginx-external  # 외부 Ingress Controller 지정
+  tls:
+  - hosts:
+    - example.com
+    secretName: tls-secret
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: public-service
+            port:
+              number: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-internal
+  namespace: internal-namespace  # 내부 접근을 위한 네임스페이스
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1G"  # client_max_body_size 설정
+    nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.0.0/16"  # 내부 IP 범위 설정
+spec:
+  ingressClassName: nginx-internal  # 내부 Ingress Controller 지정
+  rules:
+  - host: internal.example.com
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: internal-service
+            port:
+              number: 80
