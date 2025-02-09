@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset
+spec:
+  serviceName: "my-headless-service"  # Headless Service와 연결
+  replicas: 2  # 파드 수
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+              name: web
+          volumeMounts:
+            - name: my-storage
+              mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+    - metadata:
+        name: my-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi  # 각 파드에 대한 스토리지 요청
