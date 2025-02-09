@@ -1,0 +1,28 @@
+# kubectl create secret tls tls-qdrant --key sample.pem --cert sample_chain_crt.pem -n qdrant
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-qdrant
+  namespace: qdrant
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1G"  # client_max_body_size 설정
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"  # 읽기 타임아웃 설정
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"  # 전송 타임아웃 설정
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"  # 연결 타임아웃 설정
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: qdrant-sample.com
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: qdrant
+            port:
+              number: 6333
+  tls:
+  - hosts:
+    - qdrant-sample.com
+    secretName: tls-qdrant
