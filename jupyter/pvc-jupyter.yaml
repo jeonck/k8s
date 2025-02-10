@@ -1,0 +1,13 @@
+### 1. **PVC 생성 YAML **
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jupyter-pvc
+  namespace: jupyter
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi  # AKS 기본 스토리지 클래스 사용 시 생략 가능
+  resources:
+    requests:
+      storage: 10Gi  # 필요한 저장공간 크기 지정
