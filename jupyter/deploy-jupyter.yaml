@@ -1,0 +1,61 @@
+# jupyter-pycaret-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-lab
+  namespace: jupyter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-lab
+  template:
+    metadata:
+      labels:
+        app: jupyter-lab
+    spec:
+      securityContext:  # PVC 접근 권한 설정
+        runAsUser: 1000  # jovyan 사용자의 UID
+        fsGroup: 1000    # Jupyter 기본 사용자 UID
+      containers:
+      - name: jupyter-lab
+        image: jupyter/base-notebook:latest
+        ports:
+        - containerPort: 8888
+        volumeMounts:
+        - name: jupyter-storage
+          mountPath: /home/jovyan/work  # Jupyter 작업 디렉토리
+        env:
+        - name: JUPYTER_TOKEN
+          value: "your-token"  # 실제 사용시 랜덤 토큰으로 변경
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "2"
+        command: ["sh", "-c"]
+        args:
+          - echo "Installing dependencies..." &&
+            pip install --upgrade pip &&
+            pip install torch tensorflow pycaret pandas numpy scikit-learn matplotlib seaborn &&
+            start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}
+      volumes:
+      - name: jupyter-storage
+        persistentVolumeClaim:
+          claimName: jupyter-pvc  # 위에서 생성한 PVC 이름
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-service
+  namespace: jupyter
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8888
+    targetPort: 8888
+  selector:
+    app: jupyter-lab
