@@ -20,3 +20,7 @@ namespace/pinot annotated
  
 # helm install  
 helm install pinot pinot/pinot -n pinot  
+
+
+# connect  
+http://localhost:9000/   
