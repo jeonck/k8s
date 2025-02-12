@@ -1,0 +1,13 @@
+helm install superset apache-superset/superset \
+  --namespace superset \
+  --set "configOverrides.secret=SECRET_KEY = 'your_secret'" \
+  --set postgresql.enabled=true \
+  --set postgresql.auth.username=postgres \
+  --set postgresql.auth.password="omniverse123\!" \
+  --set postgresql.auth.database=superset \
+  --set redis.enabled=true \
+  --set redis.password="omniverse123\!" \
+  --set service.type=LoadBalancer \
+  --set service.port=8088 \
+  --set "service.nodePort.http=30088" \
+  --set "bootstrapScript=pip install psycopg2-binary pinotdb"
