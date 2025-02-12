@@ -1,0 +1,43 @@
+# https://github.com/apache/superset/blob/master/helm/superset/values.yaml  
+
+configOverrides:
+  secret: |
+    SECRET_KEY = 'you_secret_key'   # openssl rand -base64 42
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "1"
+  limits:
+    memory: "4Gi"
+    cpu: "2"
+
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: "omniverse123!"
+    database: superset
+  primary:     # PostgreSQL StatefulSet의 nodeSelector
+    nodeSelector:
+      agentpool: agentpool
+redis:
+  enabled: true
+  password: "omniverse123!"
+  master:     # Redis master StatefulSet의 nodeSelector
+    nodeSelector:
+      agentpool: agentpool
+
+
+service:
+  type: LoadBalancer
+  port: 8088
+  nodePort:
+    http: 30088
+
+bootstrapScript: |
+  pip install psycopg2-binary pinotdb
+
+# Superset Pod의 nodeSelector
+nodeSelector:
+  agentpool: agentpool
