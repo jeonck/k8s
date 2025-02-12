@@ -1,5 +1,7 @@
 # https://github.com/apache/superset/blob/master/helm/superset/values.yaml  
 
+# helm install superset apache-superset/superset -f superset-values.yaml -n superset
+
 configOverrides:
   secret: |
     SECRET_KEY = 'you_secret_key'   # openssl rand -base64 42
