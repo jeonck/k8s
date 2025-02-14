@@ -1,4 +1,4 @@
-https://strimzi.io/quickstarts/
+https://strimzi.io/quickstarts/  
 https://strimzi.io/docs/operators/latest/overview
 
 # cretate ns
