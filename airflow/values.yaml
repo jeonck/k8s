@@ -1,3 +1,4 @@
+# kubectl create ns airflow
 # helm upgrade --install airflow apache-airflow/airflow -f values.yaml -n airflow 
 
 webserver:
