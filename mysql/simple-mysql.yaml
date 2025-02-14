@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace 
+metadata:
+  name: mysql
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-mysql
+  namespace: mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Mi
+    limits:
+      storage: 300Mi
+      
+---
+
+apiVersion: v1
+kind: Service  
+metadata:
+  name: mysql
+  namespace: mysql
+spec:
+  ports:
+  - port: 3306
+  
+---
+
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: your_password
+        - name: MYSQL_DATABASE
+          value: mydb
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data 
+        persistentVolumeClaim:
+          claimName: pvc-mysql
