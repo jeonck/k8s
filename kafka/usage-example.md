@@ -1,4 +1,6 @@
 ## Kafka 사용 예제
+![image](https://github.com/user-attachments/assets/9fe6323a-b33a-4bff-8fdc-27685abbc2da)
+
 
 이 예제에서는 Apache Kafka를 사용하여 토픽을 생성하고, 프로듀서를 통해 메시지를 보내며, 컨슈머를 통해 메시지를 읽는 과정을 단계별로 설명합니다.
 
