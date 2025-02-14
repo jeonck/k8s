@@ -1,0 +1,42 @@
+# helm upgrade --install airflow apache-airflow/airflow -f values.yaml -n airflow 
+
+webserver:
+  service:
+    type: LoadBalancer
+# Webserver Secret Key 설정
+webserverSecretKeySecretName: airflow-webserver-secret  # make secret first : 
+ 
+# Node Selector 설정
+nodeSelector:
+  agentpool: agentpool
+ 
+# Airflow scheduler settings
+scheduler:
+  enabled: true
+  command: ~
+  args:
+    - "bash"
+    - "-c"
+    - |
+      pip install confluent-kafka && \
+      exec airflow scheduler
+   
+ 
+dags:
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClassName: azureblob-fuse-premium  # you can use other sc
+    accessMode: ReadWriteMany
+  mountPath: /opt/airflow/dags
+ 
+ 
+# 기본 설정
+executor: "KubernetesExecutor"
+ 
+# 기본 환경 설정
+env:
+  - name: AIRFLOW__CORE__DEFAULT_TIMEZONE
+    value: "Asia/Seoul"
+  - name: AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE
+    value: "Asia/Seoul"
