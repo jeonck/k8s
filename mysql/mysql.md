@@ -1,9 +1,12 @@
 # 권한 부여 예시 
+`
 CREATE USER 'root'@'10.%' IDENTIFIED BY 'your_password';   
  
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'10.%';   
  
-SELECT User, Host FROM mysql.user;   
+SELECT User, Host FROM mysql.user; 
+
+`
 
 # 계정 생성과 권한 부여 예시
 -- sample 계정 생성  
