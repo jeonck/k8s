@@ -47,7 +47,7 @@
 ## 5. 도메인 할당
 
 - **설명**: Azure portal의 DNS Zone에 A 레코드를 할당합니다.
-    - 예시: `grafana-dev.treal.xyz`를 AKS ingress-controller IP로 할당합니다.
+    - 예시: `grafana-sample.com`를 AKS ingress-controller IP로 할당합니다.
 
 ## 6. Ingress 설정
 
