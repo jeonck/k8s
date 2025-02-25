@@ -55,7 +55,7 @@
     - **명령어**:
         
         ```bash
-        kubectl create secret tls tls-grafana --key treal_xyz_key.pem --cert treal_xyz_chain_crt.pem -n monitoring
+        kubectl create secret tls tls-grafana --key keyfile.pem --cert certfile_chain_crt.pem -n monitoring
         
         ```
         
@@ -71,8 +71,8 @@
 ## 7. Grafana 접속
 
 - **접속 방법**: 생성한 도메인으로 접속합니다.
-    - URL: `https://grafana-dev.treal.xyz`
-    - 기본 로그인 정보: `admin/aipdev123`
+    - URL: `https://grafana-sample.com`
+    - 기본 로그인 정보: `sample`
 
 ## 8. 데이터 소스 추가
 
