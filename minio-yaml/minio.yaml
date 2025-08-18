@@ -1,0 +1,88 @@
+# 1. MinIO 인증정보 Secret (base64 인코딩 과정 포함)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secret
+  namespace: minio
+type: Opaque
+data:
+  # echo -n "minioadmin" | base64
+  # bWluaW9hZG1pbg==
+  MINIO_ROOT_USER: bWluaW9hZG1pbg==
+  # echo -n "minio@demo!" | base64
+  # bWluaW9AMGVtbw==
+  MINIO_ROOT_PASSWORD: bWluaW9AMGVtbw==
+
+---
+
+# 2. MinIO 서비스 (S3/API와 콘솔 포트 오픈)
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  namespace: minio
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: 9000
+    - name: console
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP
+
+---
+
+# 3. MinIO StatefulSet + PVC(local-path 스토리지 클래스 기준)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: minio
+spec:
+  serviceName: minio-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        args:
+          - server
+          - /data
+          - --console-address
+          - ":9001"
+        env:
+          - name: MINIO_ROOT_USER
+            valueFrom:
+              secretKeyRef:
+                name: minio-secret
+                key: MINIO_ROOT_USER
+          - name: MINIO_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: minio-secret
+                key: MINIO_ROOT_PASSWORD
+        ports:
+          - containerPort: 9000
+          - containerPort: 9001
+        volumeMounts:
+          - name: data
+            mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: local-path   # <-- 여기서 local-path 스토리지 클래스 사용
+        resources:
+          requests:
+            storage: 10Gi
