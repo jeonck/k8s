@@ -13,6 +13,10 @@ Helm을 사용하여 Kubernetes 애플리케이션을 배포하는 과정에서 
 ## **결론**
 
 따라서, Helm 차트를 .tgz 파일로 저장하는 것은 Kubernetes 애플리케이션의 배포 및 관리에 있어 필수적인 과정입니다. 이는 패키징, 무결성 검증, 버전 관리 및 효율적인 저장소 관리를 가능하게 하여, 전체적인 배포 프로세스를 간소화하고 안전하게 만듭니다.
+
+### 예시 : pinot  
+https://github.com/apache/pinot/tree/master/helm   
+
 [1] https://developer.harness.io/docs/self-managed-enterprise-edition/install/install-in-an-air-gapped-environment/
 [2] https://docs.camunda.io/docs/self-managed/setup/guides/air-gapped-installation/
 [3] https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/other-installation-methods/air-gapped-helm-cli-install/install-rancher-ha
