@@ -1,6 +1,6 @@
 apiVersion: apps/v1
 kind: DaemonSet
-meta
+metadata:
   name: sysctl-tuning
   namespace: kube-system
   labels:
